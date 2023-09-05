@@ -14,6 +14,8 @@ print("Press CTRL+C to end the program.")
 kit = ServoKit(channels=16)
 channel_servo1 = 0
 channel_motor1 = 2
+channel_servo12 = 12
+channel_motor12 = 2
 # set GPIO Pins
 GPIO_Ain1 = 17 #11
 GPIO_Ain2 = 27 #13
@@ -145,24 +147,41 @@ try:
             
             if newbutton and codebutton == 304 and valuebutton == 1:        
                     channel = channel_servo1
+                    kit.servo[0].angle = angle
                     angle = 180
                     kit.servo[channel].angle = angle
                     print ('angle: {0} \t channel: {1}'.format(angle,channel))
-                    
+                    kit.servo[0].angle = angle
                     channel = channel_motor1
                     speed = 1
                     kit.continuous_servo[channel].throttle = speed
                     print ('speed: {0} \t channel: {1}'.format(speed,channel))
-                    
+                    kit.servo[0].angle = angle
                     FSM1NextState = 1
+                    kit.servo[0].angle = angle
             elif newbutton and codebutton == 307 and valuebutton == 1 :
                     FSM1NextState = 0
                     angle = 0
+                    kit.servo[0].angle = angle
                     
+
+            if newbutton and codebutton == 305 and valuebutton == 1:        
+                    channel = channel_servo12
+                    angle = 0
+                    kit.servo[channel].angle = angle
+                    kit.servo[12].angle = angle
+                    print ('angle: {0} \t channel: {1}'.format(angle,channel))
+                    channel = channel_motor12
+                    speed = 1
+                    kit.continuous_servo[channel].throttle = speed
+                    print ('speed: {0} \t channel: {1}'.format(speed,channel))
+                    FSM1NextState = 2
+                    kit.servo[12].angle = angle
+            elif newbutton and codebutton == 306 and valuebutton == 1 :
+                    FSM1NextState = 3
+                    angle = 180
+                    kit.servo[12].angle = angle
             
-            kit.servo[0].angle = angle
-
-
             if newbutton and codebutton == 312 and valuebutton == 1:
                 raise KeyboardInterrupt        
 # Quit the program when the user presses CTRL + C

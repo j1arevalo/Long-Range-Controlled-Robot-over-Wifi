@@ -1,0 +1,3 @@
+python -m input_over_ssh.client -L
+
+python -u -m input_over_ssh.client -p /dev/input/event1 | ssh hostname.example.com 'PYTHONPATH=/path/to/input-over-ssh python -m input_over_ssh.server'

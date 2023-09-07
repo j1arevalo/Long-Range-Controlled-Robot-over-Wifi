@@ -1,6 +1,7 @@
 # Libraries
 import RPi.GPIO as GPIO
 import time
+import cv2
 from evdev import InputDevice, categorize
 from adafruit_servokit import ServoKit 
  # Check if the gamepad is connected
@@ -72,6 +73,7 @@ Motor_Position = 1
 
 angle = 0
 
+
 # Main program
 try:
         
@@ -100,7 +102,7 @@ try:
             # If there was a gamepad event, show it
             if newbutton:
                 print("Button: ",codebutton,valuebutton)
-            if newstick and codestick == 1 and valuestick == 0:
+            if newstick and codestick == 1 and valuestick == 255:
                 print("Stick : ",codestick,valuestick)
         # Check the current time
                 currentTime = time.time()
@@ -108,31 +110,21 @@ try:
         # Update the state
                 FSM1State = FSM1NextState
                 
-     
-                GPIO.output(GPIO_Ain1, True)
-                GPIO.output(GPIO_Ain2, False)
-                GPIO.output(GPIO_Bin1, True)
-                GPIO.output(GPIO_Bin2, False)
-                pwmA.ChangeDutyCycle(100)                # duty cycle between 0 and 100
-                pwmB.ChangeDutyCycle(100)                # duty cycle between 0 and 100
-                print ("Forward half speed")
-                time.sleep(0.1)
-
                 GPIO.output(GPIO_Ain1, True)
                 GPIO.output(GPIO_Ain2, False)
                 GPIO.output(GPIO_Bin1, True)
                 GPIO.output(GPIO_Bin2, False)
                 pwmA.ChangeDutyCycle(100)               # duty cycle between 0 and 100
-                pwmB.ChangeDutyCycle(100)               # duty cycle between 0 and 100
+                pwmB.ChangeDutyCycle(80)               # duty cycle between 0 and 100
                 print ("Forward full speed")
                 time.sleep(0.1)
-            if newstick and codestick == 1 and valuestick == 255:
+            if newstick and codestick == 1 and valuestick == 0:
                 GPIO.output(GPIO_Ain1, False)
                 GPIO.output(GPIO_Ain2, True)
                 GPIO.output(GPIO_Bin1, False)
                 GPIO.output(GPIO_Bin2, True)
                 pwmA.ChangeDutyCycle(100)                # duty cycle between 0 and 100
-                pwmB.ChangeDutyCycle(100)                # duty cycle between 0 and 100
+                pwmB.ChangeDutyCycle(92)                # duty cycle between 0 and 100
                 print ("Backward third speed")
                 time.sleep(0.1)
             if newstick and codestick == 1 and valuestick == 128: 
@@ -142,51 +134,78 @@ try:
                 GPIO.output(GPIO_Bin2, False)
                 print ("Stop")
                 time.sleep(0.1)
+            if newstick and codestick == 0 and valuestick == 255:
+                GPIO.output(GPIO_Ain1, True)
+                GPIO.output(GPIO_Ain2, False)
+                GPIO.output(GPIO_Bin1, False)
+                GPIO.output(GPIO_Bin2, True)
+                pwmA.ChangeDutyCycle(100)               # duty cycle between 0 and 100
+                pwmB.ChangeDutyCycle(100)               # duty cycle between 0 and 100
+                print ("Forward full speed")
+                time.sleep(0.1)
+            if newstick and codestick == 0 and valuestick == 0:
+                GPIO.output(GPIO_Ain1, False)
+                GPIO.output(GPIO_Ain2, True)
+                GPIO.output(GPIO_Bin1, True)
+                GPIO.output(GPIO_Bin2, False)
+                pwmA.ChangeDutyCycle(100)               # duty cycle between 0 and 100
+                pwmB.ChangeDutyCycle(100)               # duty cycle between 0 and 100
+                print ("Forward full speed")
+                time.sleep(0.1)
+            if newstick and codestick == 0 and valuestick == 128: 
+                GPIO.output(GPIO_Ain1, False)
+                GPIO.output(GPIO_Ain2, False)
+                GPIO.output(GPIO_Bin1, False)
+                GPIO.output(GPIO_Bin2, False)
+                print ("Stop")
+                time.sleep(0.1)
+
+                
         # Clean up GPIO if there was an error
         #GPIO.cleanup()
-            
+            if newbutton and codebutton == 312 and valuebutton == 1:
+                raise KeyboardInterrupt           
             if newbutton and codebutton == 304 and valuebutton == 1:        
-                    channel = channel_servo1
-                    kit.servo[0].angle = angle
-                    angle = 180
-                    kit.servo[channel].angle = angle
-                    print ('angle: {0} \t channel: {1}'.format(angle,channel))
-                    kit.servo[0].angle = angle
-                    channel = channel_motor1
-                    speed = 1
-                    kit.continuous_servo[channel].throttle = speed
-                    print ('speed: {0} \t channel: {1}'.format(speed,channel))
-                    kit.servo[0].angle = angle
-                    FSM1NextState = 1
-                    kit.servo[0].angle = angle
-            elif newbutton and codebutton == 307 and valuebutton == 1 :
-                    FSM1NextState = 0
-                    angle = 0
-                    kit.servo[0].angle = angle
+                channel = channel_servo1
+                kit.servo[0].angle = angle
+                angle = 180
+                kit.servo[channel].angle = angle
+                print ('angle: {0} \t channel: {1}'.format(angle,channel))
+                kit.servo[0].angle = angle
+                channel = channel_motor1
+                speed = 1
+                kit.continuous_servo[channel].throttle = speed
+                print ('speed: {0} \t channel: {1}'.format(speed,channel))
+                kit.servo[0].angle = angle
+                FSM1NextState = 1
+                kit.servo[0].angle = angle
+            elif newbutton and codebutton == 307 and valuebutton == 1:
+                FSM1NextState = 0
+                angle = 0
+                kit.servo[0].angle = angle
                     
 
             if newbutton and codebutton == 305 and valuebutton == 1:        
-                    channel = channel_servo12
-                    angle = 0
-                    kit.servo[channel].angle = angle
-                    kit.servo[12].angle = angle
-                    print ('angle: {0} \t channel: {1}'.format(angle,channel))
-                    channel = channel_motor12
-                    speed = 1
-                    kit.continuous_servo[channel].throttle = speed
-                    print ('speed: {0} \t channel: {1}'.format(speed,channel))
-                    FSM1NextState = 2
-                    kit.servo[12].angle = angle
-            elif newbutton and codebutton == 306 and valuebutton == 1 :
-                    FSM1NextState = 3
-                    angle = 180
-                    kit.servo[12].angle = angle
-            
-            if newbutton and codebutton == 312 and valuebutton == 1:
-                raise KeyboardInterrupt        
+                channel = channel_servo12
+                angle = 0
+                kit.servo[channel].angle = angle
+                kit.servo[12].angle = angle
+                print ('angle: {0} \t channel: {1}'.format(angle,channel))
+                channel = channel_motor12
+                speed = 1
+                kit.continuous_servo[channel].throttle = speed
+                print ('speed: {0} \t channel: {1}'.format(speed,channel))
+                FSM1NextState = 2
+                kit.servo[12].angle = angle
+            elif newbutton and codebutton == 306 and valuebutton == 1:
+                FSM1NextState = 3
+                angle = 180
+                kit.servo[12].angle = angle
+                
 # Quit the program when the user presses CTRL + C
 except KeyboardInterrupt:
-        pwmA.stop()
-        pwmB.stop()
-        GPIO.cleanup()
+    print("Program stopped by User")
+    pwmA.stop()
+    pwmB.stop()
+    GPIO.cleanup()
 
